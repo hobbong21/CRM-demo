@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CKEditor 설정 테스트</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../../main/resources/static/css/ckeditor-custom.css" rel="stylesheet">
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+    <script src="../../../main/resources/static/js/ckeditor-config.js"></script>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>CKEditor 설정 테스트</h2>
+        
+        <div class="mb-3">
+            <label for="test-content" class="form-label">테스트 에디터</label>
+            <textarea id="test-content" class="form-control" rows="10">
+                <h2>테스트 제목</h2>
+                <p>이것은 <strong>CKEditor</strong> 테스트 내용입니다.</p>
+                <ul>
+                    <li>목록 항목 1</li>
+                    <li>목록 항목 2</li>
+                </ul>
+            </textarea>
+        </div>
+        
+        <div class="mb-3">
+            <button id="get-data" class="btn btn-primary">데이터 가져오기</button>
+            <button id="set-data" class="btn btn-secondary">데이터 설정</button>
+            <button id="clear-data" class="btn btn-warning">데이터 지우기</button>
+            <button id="destroy-editor" class="btn btn-danger">에디터 제거</button>
+        </div>
+        
+        <div id="output" class="alert alert-info" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const editorManager = new CKEditorManager();
+            let editor = null;
+            
+            // 자동 저장 설정
+            const autoSaveConfig = {
+                enabled: true,
+                interval: 5000, // 테스트용으로 5초
+                storageKey: 'ckeditor-test-autosave'
+            };
+            
+            // CKEditor 초기화
+            editorManager.initialize('#test-content', {
+                height: '300px',
+                autoSave: autoSaveConfig
+            }).then(editorInstance => {
+                editor = editorInstance;
+                console.log('테스트 에디터 초기화 완료');
+                showMessage('에디터가 성공적으로 초기화되었습니다.', 'success');
+            }).catch(error => {
+                console.error('테스트 에디터 초기화 실패:', error);
+                showMessage('에디터 초기화에 실패했습니다: ' + error.message, 'danger');
+            });
+            
+            // 버튼 이벤트 리스너
+            document.getElementById('get-data').addEventListener('click', function() {
+                if (editor) {
+                    const data = editorManager.getData();
+                    showMessage('에디터 데이터: ' + data, 'info');
+                } else {
+                    showMessage('에디터가 초기화되지 않았습니다.', 'warning');
+                }
+            });
+            
+            document.getElementById('set-data').addEventListener('click', function() {
+                if (editor) {
+                    const testData = '<h3>새로운 테스트 데이터</h3><p>이것은 <em>설정된</em> 데이터입니다.</p>';
+                    editorManager.setData(testData);
+                    showMessage('새로운 데이터가 설정되었습니다.', 'success');
+                } else {
+                    showMessage('에디터가 초기화되지 않았습니다.', 'warning');
+                }
+            });
+            
+            document.getElementById('clear-data').addEventListener('click', function() {
+                if (editor) {
+                    editorManager.setData('');
+                    showMessage('에디터 데이터가 지워졌습니다.', 'info');
+                } else {
+                    showMessage('에디터가 초기화되지 않았습니다.', 'warning');
+                }
+            });
+            
+            document.getElementById('destroy-editor').addEventListener('click', function() {
+                if (editor) {
+                    editorManager.destroy();
+                    editor = null;
+                    showMessage('에디터가 제거되었습니다.', 'warning');
+                } else {
+                    showMessage('제거할 에디터가 없습니다.', 'info');
+                }
+            });
+            
+            function showMessage(message, type) {
+                const output = document.getElementById('output');
+                output.className = `alert alert-${type}`;
+                output.textContent = message;
+                output.style.display = 'block';
+                
+                setTimeout(() => {
+                    output.style.display = 'none';
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>
